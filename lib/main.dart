@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:organic_food_directory/screens/splash_screen.dart';
-import 'package:organic_food_directory/screens/home_page.dart';
 import 'package:organic_food_directory/screens/category_page.dart';
 import 'package:organic_food_directory/screens/product_details_page.dart';
 import 'package:organic_food_directory/screens/my_list_page.dart';
@@ -9,6 +8,7 @@ import 'package:organic_food_directory/screens/external_link_page.dart';
 import 'package:organic_food_directory/screens/search_results_page.dart';
 import 'package:organic_food_directory/screens/edit_profile_page.dart';
 import 'package:organic_food_directory/screens/favorites_page.dart';
+import 'package:organic_food_directory/screens/main_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const MainScreen(),
         '/category': (context) => const CategoryPage(),
         '/product': (context) => const ProductDetailsPage(),
         '/my-list': (context) => const MyListPage(),

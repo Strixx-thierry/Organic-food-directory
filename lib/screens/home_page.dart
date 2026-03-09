@@ -59,39 +59,44 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 30),
 
               // Search Bar
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search organic products...',
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: Color(0xFF1B5E20),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                    suffixIcon: Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2E7D32),
-                        borderRadius: BorderRadius.circular(10),
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/search-results'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                      child: const Icon(
-                        Icons.tune,
-                        color: Colors.white,
-                        size: 20,
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search, color: Color(0xFF1B5E20)),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Search organic products...',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
                       ),
-                    ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E7D32),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.tune,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -110,7 +115,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.pushNamed(context, '/category'),
                     child: const Text(
                       'See All',
                       style: TextStyle(color: Color(0xFF2E7D32)),
@@ -128,21 +133,25 @@ class HomePage extends StatelessWidget {
                       'Vegetables',
                       Icons.eco_outlined,
                       Colors.green[50]!,
+                      context,
                     ),
                     _categoryItem(
                       'Fruits',
                       Icons.apple_outlined,
                       Colors.orange[50]!,
+                      context,
                     ),
                     _categoryItem(
                       'Dairy',
                       Icons.egg_outlined,
                       Colors.yellow[50]!,
+                      context,
                     ),
                     _categoryItem(
                       'Grains',
                       Icons.grass_outlined,
                       Colors.brown[50]!,
+                      context,
                     ),
                   ],
                 ),
@@ -213,48 +222,38 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF2E7D32),
-        unselectedItemColor: Colors.grey,
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _categoryItem(String name, IconData icon, Color color) {
-    return Container(
-      width: 80,
-      margin: const EdgeInsets.only(right: 15),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(15),
+  Widget _categoryItem(
+    String name,
+    IconData icon,
+    Color color,
+    BuildContext context,
+  ) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/category'),
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.only(right: 15),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(icon, color: const Color(0xFF1B5E20), size: 30),
             ),
-            child: Icon(icon, color: const Color(0xFF1B5E20), size: 30),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              name,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
