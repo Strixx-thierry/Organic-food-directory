@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:organic_food_directory/screens/splash_screen.dart';
 import 'package:organic_food_directory/screens/login_screen.dart';
+import 'package:organic_food_directory/screens/signup_screen.dart';
 import 'package:organic_food_directory/screens/main_screen.dart';
-import 'package:organic_food_directory/screens/home_page.dart';
 import 'package:organic_food_directory/screens/category_page.dart';
 import 'package:organic_food_directory/screens/product_details_page.dart';
 import 'package:organic_food_directory/screens/my_list_page.dart';
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
         '/home': (context) => const MainScreen(),
         '/category': (context) => const CategoryPage(),
         '/product': (context) => const ProductDetailsPage(),
