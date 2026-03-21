@@ -119,4 +119,4 @@ lib/firebase_options.dart
 
 # Firebase generated files
 lib/firebase_options.dart
-**/google-services.jsonandroid/app/google-services.json
+android/app/google-services.json
