@@ -1,0 +1,29 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "organic-food-directory",
+          "appId": "1:885163617614:android:88c736b48079414c46421f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "organic-food-directory",
+          "configurations": {
+            "android": "1:885163617614:android:88c736b48079414c46421f",
+            "web": "1:885163617614:web:0fbbc92c3123977946421f"
+          }
+        }
+      }
+    }
+  }
+}
