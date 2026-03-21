@@ -1,5 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:organic_food_directory/screens/splash_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
+import 'package:organic_food_directory/bloc/profile/profile_bloc.dart';
+import 'package:organic_food_directory/bloc/product/product_bloc.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_bloc.dart';
+import 'package:organic_food_directory/bloc/lists/lists_bloc.dart';
+import 'package:organic_food_directory/repositories/user_repository.dart';
+import 'package:organic_food_directory/repositories/product_repository.dart';
+import 'package:organic_food_directory/repositories/favorites_repository.dart';
+import 'package:organic_food_directory/repositories/lists_repository.dart';
+import 'package:organic_food_directory/screens/auth_wrapper.dart';
 import 'package:organic_food_directory/screens/login_screen.dart';
 import 'package:organic_food_directory/screens/signup_screen.dart';
 import 'package:organic_food_directory/screens/main_screen.dart';
@@ -12,7 +25,11 @@ import 'package:organic_food_directory/screens/search_results_page.dart';
 import 'package:organic_food_directory/screens/edit_profile_page.dart';
 import 'package:organic_food_directory/screens/favorites_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Sign out any cached session to ensure login page shows first
+  await FirebaseAuth.instance.signOut();
   runApp(const MyApp());
 }
 
@@ -21,28 +38,43 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Organic Food Directory',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc(repository: UserRepository())),
+        BlocProvider(create: (_) => ProfileBloc(repository: UserRepository())),
+        BlocProvider(create: (_) => ProductBloc(repository: ProductRepository())),
+        BlocProvider(
+          create: (_) => FavoritesBloc(
+            favRepo: FavoritesRepository(),
+            productRepo: ProductRepository(),
+          ),
+        ),
+        BlocProvider(
+          create: (_) => ListsBloc(repository: ListsRepository()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Organic Food Directory',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
+          useMaterial3: true,
+        ),
+        home: const AuthWrapper(),
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/signup': (context) => const SignupScreen(),
+          '/home': (context) => const MainScreen(),
+          '/category': (context) => const CategoryPage(),
+          '/product': (context) => const ProductDetailsPage(),
+          '/my-list': (context) => const MyListPage(),
+          '/profile': (context) => const ProfilePage(),
+          '/external-link': (context) => const ExternalLinkPage(),
+          '/search-results': (context) => const SearchResultsPage(),
+          '/edit-profile': (context) => const EditProfilePage(),
+          '/favorites': (context) => const FavoritesPage(),
+        },
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/home': (context) => const MainScreen(),
-        '/category': (context) => const CategoryPage(),
-        '/product': (context) => const ProductDetailsPage(),
-        '/my-list': (context) => const MyListPage(),
-        '/profile': (context) => const ProfilePage(),
-        '/external-link': (context) => const ExternalLinkPage(),
-        '/search-results': (context) => const SearchResultsPage(),
-        '/edit-profile': (context) => const EditProfilePage(),
-        '/favorites': (context) => const FavoritesPage(),
-      },
     );
   }
 }
