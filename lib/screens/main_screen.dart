@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
+import 'package:organic_food_directory/bloc/auth/auth_event.dart';
 import 'package:organic_food_directory/screens/home_page.dart';
 import 'package:organic_food_directory/screens/search_results_page.dart';
 import 'package:organic_food_directory/screens/favorites_page.dart';
@@ -13,6 +16,17 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check auth state when MainScreen loads - with a small delay to ensure widget is ready
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        context.read<AuthBloc>().add(const CheckAuthStateEvent());
+      }
+    });
+  }
 
   final List<Widget> _pages = [
     const HomePage(),
