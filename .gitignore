@@ -112,3 +112,7 @@ lib/firebase_options.dart
 # Temporary files
 *.tmp
 *.temp
+
+# Firebase generated files
+lib/firebase_options.dart
+**/google-services.json
