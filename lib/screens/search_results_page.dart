@@ -1,69 +1,140 @@
 import 'package:flutter/material.dart';
-
-class SearchResultsPage extends StatelessWidget {
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:organic_food_directory/models/product_model.dart';
+import 'package:organic_food_directory/bloc/product/product_bloc.dart';
+import 'package:organic_food_directory/bloc/product/product_event.dart';
+import 'package:organic_food_directory/bloc/product/product_state.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_bloc.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_event.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
+import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
+import 'package:organic_food_directory/bloc/auth/auth_state.dart';
+class SearchResultsPage extends StatefulWidget {
   const SearchResultsPage({super.key});
 
   @override
+  State<SearchResultsPage> createState() => _SearchResultsPageState();
+}
+
+class _SearchResultsPageState extends State<SearchResultsPage> {
+  late TextEditingController _searchController;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+    _focusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF1B5E20)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Container(
-          height: 45,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const TextField(
-            decoration: InputDecoration(
-              hintText: 'Search products...',
-              prefixIcon: Icon(Icons.search, color: Color(0xFF1B5E20)),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 10),
+    return BlocBuilder<ProductBloc, ProductState>(
+      builder: (context, state) {
+        if (state is ProductInitial) {
+          context.read<ProductBloc>().add(SearchProductsEvent(''));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (state is ProductLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final results = state is ProductLoaded ? state.products : [];
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8F9FA),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new,
+                  color: Color(0xFF1B5E20)),
+              onPressed: () => Navigator.pop(context),
             ),
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Search Results',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1B5E20),
+            title: Container(
+              height: 45,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(15),
               ),
-            ),
-            const SizedBox(height: 15),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return _searchResultItem(
-                    index % 2 == 0 ? 'Organic Broccoli' : 'Green Lettuce',
-                    'Fresh Vegetable',
-                    index % 2 == 0 ? '\$3.50' : '\$2.00',
-                    context,
-                  );
+              child: TextField(
+                controller: _searchController,
+                focusNode: _focusNode,
+                onChanged: (value) {
+                  context.read<ProductBloc>().add(SearchProductsEvent(value));
                 },
+                decoration: const InputDecoration(
+                  hintText: 'Search products...',
+                  prefixIcon:
+                      Icon(Icons.search, color: Color(0xFF1B5E20)),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 10),
+                ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Search Results',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1B5E20),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: results.isEmpty ? 5 : results.length,
+                    itemBuilder: (context, index) {
+                      final p = results.isEmpty
+                          ? ProductModel(
+                              id: '',
+                              name: index % 2 == 0
+                                  ? 'Organic Broccoli'
+                                  : 'Green Lettuce',
+                              sub: 'Fresh Vegetable',
+                              price: index % 2 == 0 ? '\$3.50' : '\$2.00',
+                              category: '',
+                              image: '',
+                            )
+                          : results[index];
+                      return _searchResultItem(
+                        p.id,
+                        p.name,
+                        p.sub,
+                        p.price,
+                        context,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _searchResultItem(
+    String id,
     String name,
     String category,
     String price,
@@ -114,7 +185,8 @@ class SearchResultsPage extends StatelessWidget {
                   ),
                   Text(
                     category,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: TextStyle(
+                        color: Colors.grey[600], fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -128,13 +200,55 @@ class SearchResultsPage extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.add, color: Colors.white, size: 20),
+            Column(
+              children: [
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, authState) {
+                    final isGuest = authState is! AuthSuccess;
+                    return BlocBuilder<FavoritesBloc, FavoritesState>(
+                      builder: (context, state) {
+                        final isFavorite = state is FavoritesLoaded &&
+                            state.favorites.any((p) => p.id == id);
+                        return GestureDetector(
+                          onTap: () {
+                            if (isGuest) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Sign in to save favorites'),
+                                  backgroundColor: Colors.orange[700],
+                                  action: SnackBarAction(
+                                    label: 'Sign In',
+                                    textColor: Colors.white,
+                                    onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              context
+                                  .read<FavoritesBloc>()
+                                  .add(ToggleFavoriteEvent(id));
+                            }
+                          },
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.grey,
+                            size: 24,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2E7D32),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 20),
+                ),
+              ],
             ),
           ],
         ),
