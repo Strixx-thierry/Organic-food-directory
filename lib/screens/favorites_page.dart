@@ -6,6 +6,7 @@ import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/models/product_model.dart';
+import 'package:organic_food_directory/widgets/guest_view_placeholder.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -41,60 +42,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   Widget _buildGuestView() {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.favorite_outline,
-                size: 80,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Sign In to View Favorites',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Please sign in to see and manage your favorite products',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 14,
-                  ),
-                ),
-                child: const Text(
-                  'Sign In',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return GuestViewPlaceholder(
+      iconType: 'favorite',
+      message: 'Sign In to View Favorites',
+      submessage: 'Please sign in to see and manage your favorite products',
+      onSignIn: () => Navigator.pushReplacementNamed(context, '/login'),
     );
   }
 
@@ -247,8 +199,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => Navigator.pushNamed(context, '/home'),
-            icon: const Icon(Icons.shopping_bag),
-            label: const Text('Browse Products'),
+            icon: const Icon(Icons.shopping_bag, color: Colors.white),
+            label: const Text('Browse Products', style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2E7D32),
               padding: const EdgeInsets.symmetric(

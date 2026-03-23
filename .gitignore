@@ -49,6 +49,27 @@ app.*.map.json
 # Firebase generated files
 lib/firebase_options.dart
 
+# Firebase configuration (contains API keys and secrets)
+firebase.json
+firestore.indexes.json
+firestore.rules
+storage.rules
+
+# Firebase service account files
+android/google-services.json
+ios/Runner/GoogleService-Info.plist
+ios/google-services.plist
+
+# Environment variables and secrets
+.env
+.env.local
+.firebase/
+
+# Sensitive credentials
+**/secrets.json
+**/*.p8
+**/*.p12
+
 # Web related
 /web/build/
 # Note: Uncomment the following line if you want to ignore the web build directory
@@ -112,8 +133,3 @@ lib/firebase_options.dart
 # Temporary files
 *.tmp
 *.temp
-
-# Firebase generated files
-lib/firebase_options.dart
-**/google-services.json
-

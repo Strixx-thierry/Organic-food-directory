@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
@@ -24,12 +24,22 @@ import 'package:organic_food_directory/screens/external_link_page.dart';
 import 'package:organic_food_directory/screens/search_results_page.dart';
 import 'package:organic_food_directory/screens/edit_profile_page.dart';
 import 'package:organic_food_directory/screens/favorites_page.dart';
+import 'package:organic_food_directory/screens/privacy_and_security_page.dart';
+import 'package:organic_food_directory/screens/help_and_support_page.dart';
+import 'package:organic_food_directory/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   // Sign out any cached session to ensure login page shows first
   await FirebaseAuth.instance.signOut();
+  
+  // Initialize notification service
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  
   runApp(const MyApp());
 }
 
@@ -73,6 +83,8 @@ class MyApp extends StatelessWidget {
           '/search-results': (context) => const SearchResultsPage(),
           '/edit-profile': (context) => const EditProfilePage(),
           '/favorites': (context) => const FavoritesPage(),
+          '/privacy-security': (context) => const PrivacyAndSecurityPage(),
+          '/help-support': (context) => const HelpAndSupportPage(),
         },
       ),
     );

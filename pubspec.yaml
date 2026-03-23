@@ -48,6 +48,16 @@ dependencies:
   google_sign_in: ^6.2.0
   image_picker: ^0.8.9
 
+  # Notifications
+  flutter_local_notifications: ^19.2.1
+  timezone: ^0.10.0
+
+  # URL Launcher
+  url_launcher: ^6.2.0
+
+  # HTTP for Cloudinary upload
+  http: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
