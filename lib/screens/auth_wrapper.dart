@@ -75,13 +75,15 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
           _verificationDetected = true;
           
           // Show success snackbar
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Email verified! Welcome to Organic Food Directory'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Email verified! Welcome to Organic Food Directory'),
+                backgroundColor: Colors.green,
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
 
           // Stop the timer
           _timer?.cancel();
@@ -103,23 +105,27 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
 
   Future<void> _resendVerificationEmail() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
+    if (user != null && !user.emailVerified && mounted) {
       try {
         await user.sendEmailVerification();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification email resent! Check inbox/spam.'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 5),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Verification email resent! Check inbox/spam.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to resend: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to resend: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

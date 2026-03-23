@@ -9,6 +9,9 @@ import 'package:organic_food_directory/bloc/favorites/favorites_event.dart';
 import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
+import 'package:organic_food_directory/widgets/notification_icon_button.dart';
+import 'package:organic_food_directory/utils/notification_dialog_helper.dart';
+
 class SearchResultsPage extends StatefulWidget {
   const SearchResultsPage({super.key});
 
@@ -36,6 +39,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     _focusNode.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +89,16 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: NotificationIconButton(
+                  showBackground: false,
+                  color: const Color(0xFF1B5E20),
+                  onPressed: () => NotificationDialogHelper.showNotificationsDialog(context),
+                ),
+              ),
+            ],
           ),
           body: Padding(
             padding: const EdgeInsets.all(20),
@@ -179,76 +194,72 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   Text(
                     name,
                     style: const TextStyle(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      color: Color(0xFF1B5E20),
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     category,
                     style: TextStyle(
-                        color: Colors.grey[600], fontSize: 14),
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     price,
                     style: const TextStyle(
-                      color: Color(0xFF2E7D32),
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      color: Color(0xFF2E7D32),
                     ),
                   ),
                 ],
               ),
             ),
-            Column(
-              children: [
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, authState) {
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                return BlocBuilder<FavoritesBloc, FavoritesState>(
+                  builder: (context, state) {
+                    final isFavorite = state is FavoritesLoaded &&
+                        state.favorites.any((p) => p.id == id);
                     final isGuest = authState is! AuthSuccess;
-                    return BlocBuilder<FavoritesBloc, FavoritesState>(
-                      builder: (context, state) {
-                        final isFavorite = state is FavoritesLoaded &&
-                            state.favorites.any((p) => p.id == id);
-                        return GestureDetector(
-                          onTap: () {
-                            if (isGuest) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Sign in to save favorites'),
-                                  backgroundColor: Colors.orange[700],
-                                  action: SnackBarAction(
-                                    label: 'Sign In',
-                                    textColor: Colors.white,
-                                    onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                                  ),
-                                ),
-                              );
-                            } else {
-                              context
-                                  .read<FavoritesBloc>()
-                                  .add(ToggleFavoriteEvent(id));
-                            }
-                          },
-                          child: Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? Colors.red : Colors.grey,
-                            size: 24,
-                          ),
-                        );
+                    return GestureDetector(
+                      onTap: () {
+                        if (isGuest) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Sign in to save favorites'),
+                              backgroundColor: Colors.orange[700],
+                              action: SnackBarAction(
+                                label: 'Sign In',
+                                textColor: Colors.white,
+                                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                              ),
+                            ),
+                          );
+                        } else {
+                          context.read<FavoritesBloc>().add(ToggleFavoriteEvent(id));
+                        }
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isFavorite ? Colors.red[50] : Colors.green[50],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : const Color(0xFF2E7D32),
+                          size: 20,
+                        ),
+                      ),
                     );
                   },
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 20),
-                ),
-              ],
+                );
+              },
             ),
           ],
         ),
