@@ -1,27 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_bloc.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_event.dart';
+import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
+import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
+import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   const ProductDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const String demoProductId = 'demo-spinach';
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          // App Bar with Image
           SliverAppBar(
             expandedHeight: 400,
             pinned: true,
             backgroundColor: const Color(0xFF2E7D32),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios_new,
+                  color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.white),
-                onPressed: () {},
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, authState) {
+                  final isGuest = authState is! AuthSuccess;
+                  return BlocBuilder<FavoritesBloc, FavoritesState>(
+                    builder: (context, state) {
+                      final isFavorite = state is FavoritesLoaded &&
+                          state.favorites.any((p) => p.id == demoProductId);
+                      return IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (isGuest) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Sign in to save favorites'),
+                                backgroundColor: Colors.orange[700],
+                                action: SnackBarAction(
+                                  label: 'Sign In',
+                                  textColor: Colors.white,
+                                  onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                                ),
+                              ),
+                            );
+                          } else {
+                            context
+                                .read<FavoritesBloc>()
+                                .add(ToggleFavoriteEvent(demoProductId));
+                          }
+                        },
+                      );
+                    },
+                  );
+                },
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -39,14 +78,13 @@ class ProductDetailsPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Content
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +111,8 @@ class ProductDetailsPage extends StatelessWidget {
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.star, color: Colors.amber, size: 18),
+                            Icon(Icons.star,
+                                color: Colors.amber, size: 18),
                             SizedBox(width: 4),
                             Text(
                               '4.8',
@@ -87,7 +126,8 @@ class ProductDetailsPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     '1kg, Fresh from farm',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                    style: TextStyle(
+                        color: Colors.grey[600], fontSize: 16),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -115,7 +155,7 @@ class ProductDetailsPage extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 100), // Space for bottom bar
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
@@ -193,9 +233,11 @@ class ProductDetailsPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 12),
             ),
-            Text(sub, style: TextStyle(color: Colors.grey[600], fontSize: 10)),
+            Text(sub,
+                style: TextStyle(color: Colors.grey[600], fontSize: 10)),
           ],
         ),
       ),
