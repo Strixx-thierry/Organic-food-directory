@@ -27,6 +27,7 @@ import 'package:organic_food_directory/screens/favorites_page.dart';
 import 'package:organic_food_directory/screens/privacy_and_security_page.dart';
 import 'package:organic_food_directory/screens/help_and_support_page.dart';
 import 'package:organic_food_directory/services/notification_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ void main() async {
   final notificationService = NotificationService();
   await notificationService.initialize();
   
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
