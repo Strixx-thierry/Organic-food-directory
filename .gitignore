@@ -56,7 +56,7 @@ firestore.rules
 storage.rules
 
 # Firebase service account files
-android/google-services.json
+android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 ios/google-services.plist
 
