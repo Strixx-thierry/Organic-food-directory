@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExternalLinkPage extends StatelessWidget {
   const ExternalLinkPage({super.key});
@@ -80,8 +81,20 @@ class _ExternalLinkContent extends StatefulWidget {
   State<_ExternalLinkContent> createState() => _ExternalLinkContentState();
 }
 
-class _ExternalLinkContentState extends State<_ExternalLinkContent> {
+class _ExternalLinkContentState extends State<_ExternalLinkContent> with WidgetsBindingObserver {
   String _selectedCategory = 'All';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   List<Map<String, dynamic>> get _filtered => _selectedCategory == 'All'
       ? widget.links
@@ -89,39 +102,33 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> {
           .where((l) => l['category'] == _selectedCategory)
           .toList();
 
-  void _openLink(BuildContext context, String url, String title) {
-    // In production, use url_launcher package: launchUrl(Uri.parse(url))
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Open Link',
-            style: TextStyle(
-                color: Color(0xFF1B5E20), fontWeight: FontWeight.bold)),
-        content: Text(
-          'Open "$title" in your browser?\n\n$url',
-          style: TextStyle(color: Colors.grey[700]),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
-                style: TextStyle(color: Colors.grey[600])),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E7D32),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+  Future<void> _openLink(String url) async {
+    final Uri uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        // If link cannot be launched, show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Could not open the link'),
+              backgroundColor: Colors.red[600],
             ),
-            child: const Text('Open',
-                style: TextStyle(color: Colors.white)),
+          );
+        }
+      }
+    } catch (e) {
+      // Handle any errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Error opening link'),
+            backgroundColor: Colors.red[600],
           ),
-        ],
-      ),
-    );
+        );
+      }
+    }
   }
 
   @override
@@ -159,7 +166,7 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> {
 
             // Category Filter Chips
             SizedBox(
-              height: 40,
+              height: 48,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: widget.categories.length,
@@ -172,12 +179,17 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> {
                     child: Container(
                       margin: const EdgeInsets.only(right: 10),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: selected
                             ? const Color(0xFF2E7D32)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: selected
+                              ? const Color(0xFF2E7D32)
+                              : Colors.grey[300]!,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
@@ -186,13 +198,16 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> {
                           ),
                         ],
                       ),
+                      alignment: Alignment.center,
                       child: Text(
                         cat,
                         style: TextStyle(
                           color: selected
                               ? Colors.white
                               : Colors.grey[700],
-                          fontWeight: FontWeight.w600,
+                          fontWeight: selected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           fontSize: 13,
                         ),
                       ),
@@ -219,7 +234,7 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> {
   Widget _linkCard(Map<String, dynamic> link, BuildContext context) {
     final color = link['color'] as Color;
     return GestureDetector(
-      onTap: () => _openLink(context, link['url'], link['title']),
+      onTap: () => _openLink(link['url']),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
