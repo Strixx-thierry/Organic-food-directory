@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CloudinaryService {
-  static const String _cloudName = 'djlx88g7v';
-  static const String _uploadPreset = 'gvejyeua';
-  static const String _uploadUrl = 'https://api.cloudinary.com/v1_1/$_cloudName/image/upload';
+  static String get _cloudName => dotenv.env['CLOUDINARY_CLOUD_NAME'] ?? '';
+  static String get _uploadPreset => dotenv.env['CLOUDINARY_UPLOAD_PRESET'] ?? '';
+  static String get _uploadUrl => 'https://api.cloudinary.com/v1_1/$_cloudName/image/upload';
 
   final ImagePicker _imagePicker = ImagePicker();
 
