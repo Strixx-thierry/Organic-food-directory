@@ -1,30 +1,74 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:organic_food_directory/widgets/guest_view_placeholder.dart';
 
-import 'package:organic_food_directory/main.dart';
+Widget buildTestWidget({
+  required String iconType,
+  required String message,
+  required String submessage,
+  VoidCallback? onSignIn,
+}) {
+  return MaterialApp(
+    home: GuestViewPlaceholder(
+      iconType: iconType,
+      message: message,
+      submessage: submessage,
+      onSignIn: onSignIn ?? () {},
+    ),
+  );
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('GuestViewPlaceholder widget', () {
+    testWidgets('shows the correct icon based on iconType',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        iconType: 'favorite',
+        message: 'No favorites yet',
+        submessage: 'Sign in to save items',
+      ));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(find.byIcon(Icons.favorite_outline), findsOneWidget);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('displays the message and submessage text',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        iconType: 'person',
+        message: 'You are not signed in',
+        submessage: 'Please sign in to continue',
+      ));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(find.text('You are not signed in'), findsOneWidget);
+      expect(find.text('Please sign in to continue'), findsOneWidget);
+    });
+
+    testWidgets('Sign In button is visible on screen',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(
+        iconType: 'list',
+        message: 'No lists found',
+        submessage: 'Sign in to manage your lists',
+      ));
+
+      expect(find.text('Sign In'), findsOneWidget);
+    });
+
+    testWidgets('tapping Sign In calls the onSignIn callback',
+        (WidgetTester tester) async {
+      bool pressed = false;
+
+      await tester.pumpWidget(buildTestWidget(
+        iconType: 'person',
+        message: 'Sign in required',
+        submessage: 'To view this page',
+        onSignIn: () => pressed = true,
+      ));
+
+      await tester.tap(find.text('Sign In'));
+      await tester.pump();
+
+      expect(pressed, isTrue);
+    });
   });
 }
