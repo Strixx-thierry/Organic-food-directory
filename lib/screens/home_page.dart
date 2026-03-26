@@ -10,6 +10,7 @@ import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/widgets/notification_icon_button.dart';
 import 'package:organic_food_directory/utils/notification_dialog_helper.dart';
+import 'package:organic_food_directory/models/product_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -211,19 +212,14 @@ class _HomePageState extends State<HomePage> {
                         childAspectRatio: 0.75,
                         children: products.isEmpty
                             ? [
-                                _productItem('Organic Spinach', 'Fresh greens',
-                                    '\$4.50', 'assets/spinach.png', 'spinach-1', context),
-                                _productItem('Red Tomatoes', 'Organic farm',
-                                    '\$3.20', 'assets/tomatoes.png', 'tomato-1', context),
-                                _productItem('Sweet Apples', 'Fresh fruits',
-                                    '\$5.10', 'assets/apples.png', 'apple-1', context),
-                                _productItem('Brown Eggs', 'Cage free', '\$6.50',
-                                    'assets/eggs.png', 'eggs-1', context),
+                                _productItem(const ProductModel(id: 'spinach-1', name: 'Organic Spinach', sub: 'Fresh greens', price: '\$4.50', category: '', image: ''), context),
+                                _productItem(const ProductModel(id: 'tomato-1', name: 'Red Tomatoes', sub: 'Organic farm', price: '\$3.20', category: '', image: ''), context),
+                                _productItem(const ProductModel(id: 'apple-1', name: 'Sweet Apples', sub: 'Fresh fruits', price: '\$5.10', category: '', image: ''), context),
+                                _productItem(const ProductModel(id: 'eggs-1', name: 'Brown Eggs', sub: 'Cage free', price: '\$6.50', category: '', image: ''), context),
                               ]
                             : products
                                 .take(4)
-                                .map((p) => _productItem(p.name, p.sub, p.price,
-                                    p.image, p.id, context))
+                                .map((p) => _productItem(p, context))
                                 .toList(),
                       ),
                     ],
@@ -274,15 +270,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _productItem(
-    String name,
-    String sub,
-    String price,
-    String img,
-    String productId,
+    ProductModel product,
     BuildContext context,
   ) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/product'),
+      onTap: () => Navigator.pushNamed(context, '/product', arguments: product),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -318,7 +310,7 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    product.name,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -327,7 +319,7 @@ class _HomePageState extends State<HomePage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    sub,
+                    product.sub,
                     style: TextStyle(
                         color: Colors.grey[600], fontSize: 12),
                   ),
@@ -336,7 +328,7 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        price,
+                        product.price,
                         style: const TextStyle(
                           color: Color(0xFF2E7D32),
                           fontWeight: FontWeight.bold,
@@ -350,7 +342,7 @@ class _HomePageState extends State<HomePage> {
                               return BlocBuilder<FavoritesBloc, FavoritesState>(
                                 builder: (context, state) {
                                   final isFavorite = state is FavoritesLoaded &&
-                                      state.favorites.any((p) => p.id == productId);
+                                      state.favorites.any((p) => p.id == product.id);
                                   final isGuest = authState is! AuthSuccess;
                                   return GestureDetector(
                                     onTap: () {
@@ -369,7 +361,7 @@ class _HomePageState extends State<HomePage> {
                                       } else {
                                         context
                                             .read<FavoritesBloc>()
-                                            .add(ToggleFavoriteEvent(productId));
+                                            .add(ToggleFavoriteEvent(product.id));
                                       }
                                     },
                                     child: Container(

@@ -131,10 +131,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             )
                           : results[index];
                       return _searchResultItem(
-                        p.id,
-                        p.name,
-                        p.sub,
-                        p.price,
+                        p,
                         context,
                       );
                     },
@@ -149,14 +146,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
   }
 
   Widget _searchResultItem(
-    String id,
-    String name,
-    String category,
-    String price,
+    ProductModel product,
     BuildContext context,
   ) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/product'),
+      onTap: () => Navigator.pushNamed(context, '/product', arguments: product),
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         padding: const EdgeInsets.all(12),
@@ -192,7 +186,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    product.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -201,7 +195,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    category,
+                    product.sub,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -209,7 +203,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    price,
+                    product.price,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -224,7 +218,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 return BlocBuilder<FavoritesBloc, FavoritesState>(
                   builder: (context, state) {
                     final isFavorite = state is FavoritesLoaded &&
-                        state.favorites.any((p) => p.id == id);
+                        state.favorites.any((p) => p.id == product.id);
                     final isGuest = authState is! AuthSuccess;
                     return GestureDetector(
                       onTap: () {
@@ -241,7 +235,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                             ),
                           );
                         } else {
-                          context.read<FavoritesBloc>().add(ToggleFavoriteEvent(id));
+                          context.read<FavoritesBloc>().add(ToggleFavoriteEvent(product.id));
                         }
                       },
                       child: Container(

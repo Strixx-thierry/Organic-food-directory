@@ -172,7 +172,7 @@ class _CategoryPageState extends State<CategoryPage> {
 
   Widget _productItem(ProductModel product, BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/product'),
+      onTap: () => Navigator.pushNamed(context, '/product', arguments: product),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
