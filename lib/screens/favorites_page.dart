@@ -137,7 +137,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       ),
       onDismissed: (_) => _removeFavorite(item.id),
       child: GestureDetector(
-        onTap: () => Navigator.pushNamed(context, '/product'),
+        onTap: () => Navigator.pushNamed(context, '/product', arguments: item),
         child: Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

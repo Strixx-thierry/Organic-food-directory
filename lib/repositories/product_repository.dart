@@ -5,7 +5,7 @@ import '../models/product_model.dart';
 class ProductRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Sample product names by category
+  // sample product names by category
   static const Map<String, List<String>> productNames = {
     'Vegetables': [
       'Organic Spinach', 'Red Bell Pepper', 'Tomato', 'Cucumber', 'Carrot',
@@ -91,7 +91,8 @@ class ProductRepository {
           sub: 'Fresh organic quality',
           price: '\$${(3.50 + (id % 12)).toStringAsFixed(2)}',
           category: category,
-          image: 'https://via.placeholder.com/250?text=${Uri.encodeComponent(name)}',
+          image: '',
+          phone: '250785614800',
         ));
         id++;
       }

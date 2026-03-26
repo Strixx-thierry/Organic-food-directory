@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:organic_food_directory/bloc/favorites/favorites_bloc.dart';
 import 'package:organic_food_directory/bloc/favorites/favorites_event.dart';
 import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
+import 'package:organic_food_directory/models/product_model.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   const ProductDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const String demoProductId = 'demo-spinach';
+    final product = ModalRoute.of(context)!.settings.arguments as ProductModel?;
+
+    final productId = product?.id ?? 'demo-spinach';
+    final productName = product?.name ?? 'Organic Spinach';
+    final productSub = product?.sub ?? '1kg, Fresh from farm';
+    final productPrice = product?.price ?? '\$4.50';
+    final productPhone = product?.phone;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
@@ -21,8 +30,7 @@ class ProductDetailsPage extends StatelessWidget {
             pinned: true,
             backgroundColor: const Color(0xFF2E7D32),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new,
-                  color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
@@ -32,7 +40,7 @@ class ProductDetailsPage extends StatelessWidget {
                   return BlocBuilder<FavoritesBloc, FavoritesState>(
                     builder: (context, state) {
                       final isFavorite = state is FavoritesLoaded &&
-                          state.favorites.any((p) => p.id == demoProductId);
+                          state.favorites.any((p) => p.id == productId);
                       return IconButton(
                         icon: Icon(
                           isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -52,9 +60,7 @@ class ProductDetailsPage extends StatelessWidget {
                               ),
                             );
                           } else {
-                            context
-                                .read<FavoritesBloc>()
-                                .add(ToggleFavoriteEvent(demoProductId));
+                            context.read<FavoritesBloc>().add(ToggleFavoriteEvent(productId));
                           }
                         },
                       );
@@ -72,8 +78,11 @@ class ProductDetailsPage extends StatelessWidget {
                     colors: [Color(0xFFE8F5E9), Colors.white],
                   ),
                 ),
-                child: const Center(
-                  child: Icon(Icons.image, size: 200, color: Color(0xFF2E7D32)),
+                child: Container(
+                  color: Colors.green[50],
+                  child: const Center(
+                    child: Icon(Icons.image, size: 120, color: Colors.green),
+                  ),
                 ),
               ),
             ),
@@ -83,8 +92,7 @@ class ProductDetailsPage extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,32 +100,27 @@ class ProductDetailsPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Organic Spinach',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
+                      Expanded(
+                        child: Text(
+                          productName,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                          ),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.green[50],
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.star,
-                                color: Colors.amber, size: 18),
+                            Icon(Icons.star, color: Colors.amber, size: 18),
                             SizedBox(width: 4),
-                            Text(
-                              '4.8',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            Text('4.8', style: TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -125,9 +128,8 @@ class ProductDetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '1kg, Fresh from farm',
-                    style: TextStyle(
-                        color: Colors.grey[600], fontSize: 16),
+                    productSub,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -148,7 +150,7 @@ class ProductDetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Our organic spinach is grown without any synthetic pesticides or fertilizers. It is harvested fresh daily and delivered straight to your door. Packed with vitamins A and C, it is the perfect addition to your healthy diet.',
+                    'Our organic product is grown without any synthetic pesticides or fertilizers. It is harvested fresh daily and delivered straight to your door. Packed with nutrients, it is the perfect addition to your healthy diet.',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[700],
@@ -176,17 +178,14 @@ class ProductDetailsPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Column(
+            Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const Text('Price', style: TextStyle(color: Colors.grey, fontSize: 14)),
                 Text(
-                  'Price',
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                Text(
-                  '\$4.50',
-                  style: TextStyle(
+                  productPrice,
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF2E7D32),
@@ -197,7 +196,19 @@ class ProductDetailsPage extends StatelessWidget {
             const SizedBox(width: 24),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  if (productPhone == null || productPhone.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Contact is not available'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else {
+                    final url = 'https://wa.me/$productPhone?text=Hi, I am interested in $productName';
+                    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -206,7 +217,7 @@ class ProductDetailsPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Add to Cart',
+                  'Check Availability',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
@@ -231,13 +242,8 @@ class ProductDetailsPage extends StatelessWidget {
           children: [
             Icon(icon, color: const Color(0xFF2E7D32)),
             const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-            Text(sub,
-                style: TextStyle(color: Colors.grey[600], fontSize: 10)),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            Text(sub, style: TextStyle(color: Colors.grey[600], fontSize: 10)),
           ],
         ),
       ),
