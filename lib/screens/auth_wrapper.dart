@@ -168,6 +168,7 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
                 label: const Text('Resend Verification Email'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 14,

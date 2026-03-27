@@ -105,25 +105,12 @@ class _ExternalLinkContentState extends State<_ExternalLinkContent> with Widgets
   Future<void> _openLink(String url) async {
     final Uri uri = Uri.parse(url);
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        // If link cannot be launched, show error message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Could not open the link'),
-              backgroundColor: Colors.red[600],
-            ),
-          );
-        }
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      // Handle any errors
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Error opening link'),
+            content: const Text('Could not open the link'),
             backgroundColor: Colors.red[600],
           ),
         );
