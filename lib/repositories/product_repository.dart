@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import '../models/product_model.dart';
 
 class ProductRepository {
@@ -144,13 +147,20 @@ class ProductRepository {
         );
   }
 
-  /// Upload image bytes to Firebase Storage and return the download URL.
+  /// Upload image bytes to Cloudinary and return the secure download URL.
   Future<String> uploadProductImage(Uint8List bytes) async {
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('products/${DateTime.now().millisecondsSinceEpoch}.jpg');
-    await ref.putData(bytes);
-    return ref.getDownloadURL();
+    final cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME']!;
+    final uploadPreset = dotenv.env['CLOUDINARY_UPLOAD_PRESET']!;
+    final uri = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/image/upload');
+    final request = http.MultipartRequest('POST', uri)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(http.MultipartFile.fromBytes('file', bytes, filename: 'product.jpg'));
+    final response = await request.send();
+    if (response.statusCode != 200) {
+      throw Exception('Cloudinary upload failed: ${response.statusCode}');
+    }
+    final body = jsonDecode(await response.stream.bytesToString());
+    return body['secure_url'] as String;
   }
 
   /// Write a new product document to Firestore.
