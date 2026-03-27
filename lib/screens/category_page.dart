@@ -9,6 +9,7 @@ import 'package:organic_food_directory/bloc/favorites/favorites_event.dart';
 import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
+import 'package:organic_food_directory/utils/product_image_helper.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -191,18 +192,15 @@ class _CategoryPageState extends State<CategoryPage> {
             Expanded(
               child: Stack(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green[50],
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                      image: DecorationImage(
-                        image: NetworkImage(product.image),
-                        fit: BoxFit.cover,
-                      ),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
                     ),
-                    width: double.infinity,
+                    child: Image.asset(
+                      ProductImageHelper.getAssetPath(product.name),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
                   ),
                   Positioned(
                     top: 8,
@@ -241,7 +239,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 4,
                                     ),
                                   ],
