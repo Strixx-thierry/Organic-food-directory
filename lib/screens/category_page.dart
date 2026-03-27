@@ -29,7 +29,7 @@ class _CategoryPageState extends State<CategoryPage> {
   // Add-product form state
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _subController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _phoneController = TextEditingController();
   String _formCategory = 'Vegetables';
@@ -56,7 +56,7 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _subController.dispose();
+    _descriptionController.dispose();
     _priceController.dispose();
     _phoneController.dispose();
     super.dispose();
@@ -115,7 +115,7 @@ class _CategoryPageState extends State<CategoryPage> {
     }
     context.read<ProductBloc>().add(AddProductEvent(
       name: _nameController.text.trim(),
-      sub: _subController.text.trim(),
+      description: _descriptionController.text.trim(),
       price: _priceController.text.trim(),
       category: _formCategory,
       imageBytes: _pickedBytes!,
@@ -128,7 +128,7 @@ class _CategoryPageState extends State<CategoryPage> {
 
   void _showAddProductSheet() {
     _nameController.clear();
-    _subController.clear();
+    _descriptionController.clear();
     _priceController.clear();
     _phoneController.clear();
     _formFresh = 'Today';
@@ -256,8 +256,8 @@ class _CategoryPageState extends State<CategoryPage> {
 
                   // Subtitle
                   TextFormField(
-                    controller: _subController,
-                    decoration: _inputDecoration('Subtitle'),
+                    controller: _descriptionController,
+                    decoration: _inputDecoration('Description'),
                     validator: (v) =>
                         (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
@@ -405,10 +405,14 @@ class _CategoryPageState extends State<CategoryPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF2E7D32),
-        onPressed: _showAddProductSheet,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) => authState is AuthSuccess
+            ? FloatingActionButton(
+                backgroundColor: const Color(0xFF2E7D32),
+                onPressed: _showAddProductSheet,
+                child: const Icon(Icons.add, color: Colors.white),
+              )
+            : const SizedBox.shrink(),
       ),
       body: StreamBuilder<List<ProductModel>>(
         stream: _productRepository.productsStream(),
@@ -630,9 +634,6 @@ class _CategoryPageState extends State<CategoryPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(product.sub,
-                      style: TextStyle(
-                          color: Colors.grey[600], fontSize: 12)),
                   const SizedBox(height: 8),
                   Text(
                     product.price,

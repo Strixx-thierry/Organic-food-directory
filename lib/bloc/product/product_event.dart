@@ -25,7 +25,7 @@ class LoadProductDetailEvent extends ProductEvent {
 
 class AddProductEvent extends ProductEvent {
   final String name;
-  final String sub;
+  final String description;
   final String price;
   final String category;
   final Uint8List imageBytes;
@@ -36,7 +36,7 @@ class AddProductEvent extends ProductEvent {
 
   const AddProductEvent({
     required this.name,
-    required this.sub,
+    required this.description,
     required this.price,
     required this.category,
     required this.imageBytes,
@@ -48,5 +48,5 @@ class AddProductEvent extends ProductEvent {
 
   @override
   List<Object> get props =>
-      [name, sub, price, category, imageBytes, phone, fresh, organic, farm];
+      [name, description, price, category, imageBytes, phone, fresh, organic, farm];
 }

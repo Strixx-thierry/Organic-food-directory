@@ -18,7 +18,7 @@ class ProductDetailsPage extends StatelessWidget {
 
     final productId = product?.id ?? 'demo-spinach';
     final productName = product?.name ?? 'Organic Spinach';
-    final productSub = product?.sub ?? '1kg, Fresh from farm';
+    final productDescription = product?.description ?? '';
     final productPrice = product?.price ?? '\$4.50';
     final productPhone = product?.phone;
 
@@ -141,36 +141,39 @@ class ProductDetailsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    productSub,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                  ),
+                  if (productDescription.isNotEmpty)
+                    Text(
+                      productDescription,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                    ),
                   const SizedBox(height: 24),
                   Row(
                     children: [
                       _infoCard(Icons.access_time, 'Fresh', product?.fresh ?? 'Today'),
-                      _infoCard(Icons.eco_outlined, product?.organic ?? '100%', 'Organic'),
+                      _infoCard(Icons.eco_outlined, (product?.organic ?? '100% Organic').replaceAll(' Organic', ''), 'Organic'),
                       _infoCard(Icons.location_on_outlined, product?.farm ?? 'Local', 'Farm'),
                     ],
                   ),
                   const SizedBox(height: 32),
-                  const Text(
-                    'About Product',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1B5E20),
+                  if (productDescription.isNotEmpty) ...[
+                    const Text(
+                      'About Product',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1B5E20),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Our organic product is grown without any synthetic pesticides or fertilizers. It is harvested fresh daily and delivered straight to your door. Packed with nutrients, it is the perfect addition to your healthy diet.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                      height: 1.5,
+                    const SizedBox(height: 12),
+                    Text(
+                      productDescription,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 100),
                 ],
               ),

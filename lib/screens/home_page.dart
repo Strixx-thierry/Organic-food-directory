@@ -27,7 +27,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _subController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _phoneController = TextEditingController();
   String _formCategory = 'Vegetables';
@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _nameController.dispose();
-    _subController.dispose();
+    _descriptionController.dispose();
     _priceController.dispose();
     _phoneController.dispose();
     super.dispose();
@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
     }
     context.read<ProductBloc>().add(AddProductEvent(
       name: _nameController.text.trim(),
-      sub: _subController.text.trim(),
+      description: _descriptionController.text.trim(),
       price: _priceController.text.trim(),
       category: _formCategory,
       imageBytes: _pickedBytes!,
@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
 
   void _showAddProductSheet() {
     _nameController.clear();
-    _subController.clear();
+    _descriptionController.clear();
     _priceController.clear();
     _phoneController.clear();
     _pickedFile = null;
@@ -194,8 +194,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
-                    controller: _subController,
-                    decoration: _inputDecoration('Subtitle'),
+                    controller: _descriptionController,
+                    decoration: _inputDecoration('Description'),
+                    maxLines: 3,
+                    minLines: 1,
                     validator: (v) =>
                         (v == null || v.trim().isEmpty) ? 'Required' : null,
                   ),
@@ -353,11 +355,13 @@ class _HomePageState extends State<HomePage> {
         
             return Scaffold(
               backgroundColor: const Color(0xFFF8F9FA),
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: const Color(0xFF2E7D32),
-                onPressed: _showAddProductSheet,
-                child: const Icon(Icons.add, color: Colors.white),
-              ),
+              floatingActionButton: authState is AuthSuccess
+                  ? FloatingActionButton(
+                      backgroundColor: const Color(0xFF2E7D32),
+                      onPressed: _showAddProductSheet,
+                      child: const Icon(Icons.add, color: Colors.white),
+                    )
+                  : null,
               body: SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -521,14 +525,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisSpacing: 15,
                         mainAxisSpacing: 15,
                         childAspectRatio: 0.75,
-                        children: products.isEmpty
-                            ? [
-                                _productItem(const ProductModel(id: 'spinach-1', name: 'Organic Spinach', sub: 'Fresh greens', price: '\$4.50', category: '', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLuIic4tYcrZvlnqopdsZRyuciPM77rza6Qw&s'), context),
-                                _productItem(const ProductModel(id: 'tomato-1', name: 'Red Tomatoes', sub: 'Organic farm', price: '\$3.20', category: '', image: 'https://cdn.prod.website-files.com/5b0fe2f89e0734b12f0d7f7e/5ea325d360a1b6c56a0452b4_Brand%20ecomm%20images%20square.png'), context),
-                                _productItem(const ProductModel(id: 'apple-1', name: 'Sweet Apples', sub: 'Fresh fruits', price: '\$5.10', category: '', image: 'https://www.gurneys.com/cdn/shop/files/12984A.webp?v=1729090097'), context),
-                                _productItem(const ProductModel(id: 'eggs-1', name: 'Brown Eggs', sub: 'Cage free', price: '\$6.50', category: '', image: 'https://images.squarespace-cdn.com/content/v1/63def75d6c752e7159ee7dd3/1689095881545-GJZCBTOHB8MF8LUHTLP7/Hope+Hill+Family+Farms+Brown+Eggs.jpg'), context),
-                              ]
-                            : products
+                        children: products
                                 .take(4)
                                 .map((p) => _productItem(p, context))
                                 .toList(),
@@ -645,11 +642,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    product.sub,
-                    style: TextStyle(
-                        color: Colors.grey[600], fontSize: 12),
                   ),
                   const SizedBox(height: 8),
                   Row(

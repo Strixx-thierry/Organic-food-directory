@@ -45,7 +45,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         final all = await _repository.getAllProducts();
         final filtered = all.where((p) {
           return p.name.toLowerCase().contains(query) ||
-              p.sub.toLowerCase().contains(query) ||
+              p.description.toLowerCase().contains(query) ||
               p.category.toLowerCase().contains(query);
         }).toList();
         emit(ProductLoaded(filtered));
@@ -74,7 +74,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           await _repository.uploadProductImage(event.imageBytes);
       await _repository.addProduct({
         'name': event.name,
-        'sub': event.sub,
+        'sub': event.description,
         'price': event.price,
         'category': event.category,
         'image': imageUrl,
