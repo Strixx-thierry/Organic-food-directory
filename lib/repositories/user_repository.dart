@@ -235,7 +235,9 @@ class UserRepository {
   }
 
   Future<void> logout() async {
-    await _googleSignIn.signOut();
+    if (_googleSignInInitialized) {
+      await _googleSignIn.signOut();
+    }
     await _auth.signOut();
   }
   
