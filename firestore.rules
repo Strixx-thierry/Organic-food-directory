@@ -19,9 +19,10 @@ service cloud.firestore {
       allow read: if true; // Public profiles
     }
     
-    // Allow anyone to read products
+    // Allow anyone to read products, authenticated users to write
     match /products/{document=**} {
       allow read: if true;
+      allow write: if request.auth != null;
     }
     
     // Deny all other access
