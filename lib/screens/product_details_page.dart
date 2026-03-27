@@ -7,6 +7,7 @@ import 'package:organic_food_directory/bloc/favorites/favorites_state.dart';
 import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/models/product_model.dart';
+import 'package:organic_food_directory/utils/product_image_helper.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   const ProductDetailsPage({super.key});
@@ -70,21 +71,34 @@ class ProductDetailsPage extends StatelessWidget {
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFE8F5E9), Colors.white],
-                  ),
-                ),
-                child: Container(
-                  color: Colors.green[50],
-                  child: const Center(
-                    child: Icon(Icons.image, size: 120, color: Colors.green),
-                  ),
-                ),
-              ),
+              background: product?.image.startsWith('http') == true
+                  ? Image.network(
+                      product!.image,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (ctx, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          color: Colors.green[50],
+                          child: const Center(
+                              child: CircularProgressIndicator()),
+                        );
+                      },
+                      errorBuilder: (ctx, e, st) => Container(
+                        color: Colors.green[50],
+                        child: const Icon(Icons.broken_image,
+                            size: 80, color: Colors.green),
+                      ),
+                    )
+                  : Image.asset(
+                      ProductImageHelper.getAssetPath(
+                          product?.name ?? ''),
+                      fit: BoxFit.cover,
+                      errorBuilder: (ctx, e, st) => Container(
+                        color: Colors.green[50],
+                        child: const Icon(Icons.image,
+                            size: 120, color: Colors.green),
+                      ),
+                    ),
             ),
           ),
           SliverToBoxAdapter(
@@ -134,9 +148,9 @@ class ProductDetailsPage extends StatelessWidget {
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      _infoCard(Icons.access_time, 'Fresh', 'Today'),
-                      _infoCard(Icons.eco_outlined, '100%', 'Organic'),
-                      _infoCard(Icons.location_on_outlined, 'Local', 'Farm'),
+                      _infoCard(Icons.access_time, 'Fresh', product?.fresh ?? 'Today'),
+                      _infoCard(Icons.eco_outlined, product?.organic ?? '100%', 'Organic'),
+                      _infoCard(Icons.location_on_outlined, product?.farm ?? 'Local', 'Farm'),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -170,7 +184,7 @@ class ProductDetailsPage extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -4),
             ),
