@@ -1,5 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+
 import 'package:organic_food_directory/bloc/product/product_bloc.dart';
 import 'package:organic_food_directory/bloc/product/product_event.dart';
 import 'package:organic_food_directory/bloc/product/product_state.dart';
@@ -21,6 +25,305 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _subController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _phoneController = TextEditingController();
+  String _formCategory = 'Vegetables';
+  String _formFresh = 'Today';
+  String _formOrganic = '100% Organic';
+  String _formFarm = 'Local';
+  XFile? _pickedFile;
+  Uint8List? _pickedBytes;
+  bool _showImageError = false;
+  // Cache the last loaded list so the grid doesn't blank out during ProductAdding.
+  List<ProductModel> _lastProducts = [];
+
+  static const List<String> _categories = [
+    'Vegetables', 'Fruits', 'Dairy', 'Grains', 'Meat', 'Organic',
+  ];
+  static const List<String> _freshnessOptions = ['Today', 'This Week', 'This Month'];
+  static const List<String> _organicOptions = ['100% Organic', '75% Organic', '50% Organic', 'Non-Organic'];
+  static const List<String> _farmOptions = ['Local', 'Regional', 'Imported'];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _subController.dispose();
+    _priceController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage(StateSetter setSheet) async {
+    final picked = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (picked != null) {
+      final bytes = await picked.readAsBytes();
+      setSheet(() {
+        _pickedFile = picked;
+        _pickedBytes = bytes;
+        _showImageError = false;
+      });
+    }
+  }
+
+  void _submitProduct(StateSetter setSheet) {
+    if (!_formKey.currentState!.validate()) return;
+    if (_pickedBytes == null) {
+      setSheet(() => _showImageError = true);
+      return;
+    }
+    context.read<ProductBloc>().add(AddProductEvent(
+      name: _nameController.text.trim(),
+      sub: _subController.text.trim(),
+      price: _priceController.text.trim(),
+      category: _formCategory,
+      imageBytes: _pickedBytes!,
+      phone: _phoneController.text.trim(),
+      fresh: _formFresh,
+      organic: _formOrganic,
+      farm: _formFarm,
+    ));
+  }
+
+  void _showAddProductSheet() {
+    _nameController.clear();
+    _subController.clear();
+    _priceController.clear();
+    _phoneController.clear();
+    _pickedFile = null;
+    _pickedBytes = null;
+    _showImageError = false;
+    _formCategory = 'Vegetables';
+    _formFresh = 'Today';
+    _formOrganic = '100% Organic';
+    _formFarm = 'Local';
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => BlocConsumer<ProductBloc, ProductState>(
+        listener: (bCtx, state) {
+          if (state is ProductAddSuccess) {
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(bCtx).showSnackBar(
+              const SnackBar(
+                content: Text('Product added successfully'),
+                backgroundColor: Color(0xFF2E7D32),
+              ),
+            );
+          } else if (state is ProductAddError) {
+            ScaffoldMessenger.of(bCtx).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (bCtx, productState) {
+          final isUploading = productState is ProductAdding;
+          return StatefulBuilder(
+            builder: (ctx, setSheet) => Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Add Product',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B5E20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Image picker
+                  GestureDetector(
+                    onTap: () => _pickImage(setSheet),
+                    child: Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _showImageError ? Colors.red : Colors.grey[300]!,
+                          width: _showImageError ? 1.5 : 1,
+                        ),
+                      ),
+                      child: _pickedBytes != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.memory(_pickedBytes!,
+                                  fit: BoxFit.cover, width: double.infinity),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_outlined,
+                                    size: 48, color: Colors.grey[400]),
+                                const SizedBox(height: 8),
+                                Text('Tap to pick image from gallery',
+                                    style: TextStyle(color: Colors.grey[500])),
+                              ],
+                            ),
+                    ),
+                  ),
+                  if (_showImageError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, left: 4),
+                      child: Text(
+                        'Please select a product image',
+                        style: TextStyle(color: Colors.red[700], fontSize: 12),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: _inputDecoration('Product Name'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _subController,
+                    decoration: _inputDecoration('Subtitle'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _priceController,
+                    decoration: _inputDecoration('Price (e.g. \$4.99)'),
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _formCategory,
+                    decoration: _inputDecoration('Category'),
+                    items: _categories
+                        .map((c) =>
+                            DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) setSheet(() => _formCategory = v);
+                    },
+                    validator: (v) => v == null ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _phoneController,
+                    decoration: _inputDecoration('Phone (WhatsApp number)'),
+                    keyboardType: TextInputType.phone,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _formFresh,
+                    decoration: _inputDecoration('Freshness'),
+                    items: _freshnessOptions
+                        .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+                        .toList(),
+                    onChanged: (v) { if (v != null) setSheet(() => _formFresh = v); },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _formOrganic,
+                    decoration: _inputDecoration('Organic'),
+                    items: _organicOptions
+                        .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+                        .toList(),
+                    onChanged: (v) { if (v != null) setSheet(() => _formOrganic = v); },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _formFarm,
+                    decoration: _inputDecoration('Origin'),
+                    items: _farmOptions
+                        .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+                        .toList(),
+                    onChanged: (v) { if (v != null) setSheet(() => _formFarm = v); },
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: isUploading
+                          ? null
+                          : () => _submitProduct(setSheet),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        disabledBackgroundColor: Colors.grey[300],
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: isUploading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text('Add Product',
+                              style: TextStyle(
+                                  fontSize: 16, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) => InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF2E7D32)),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
@@ -44,10 +347,16 @@ class _HomePageState extends State<HomePage> {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            final products = state is ProductLoaded ? state.products : [];
+            if (state is ProductLoaded) _lastProducts = state.products;
+            final products = _lastProducts;
         
             return Scaffold(
               backgroundColor: const Color(0xFFF8F9FA),
+              floatingActionButton: FloatingActionButton(
+                backgroundColor: const Color(0xFF2E7D32),
+                onPressed: _showAddProductSheet,
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
               body: SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -166,7 +475,7 @@ class _HomePageState extends State<HomePage> {
                                 context),
                             _categoryItem(
                                 'Fruits',
-                                Icons.apple_outlined,
+                                Icons.local_florist,
                                 Colors.orange[50]!,
                                 context),
                             _categoryItem(
@@ -296,11 +605,29 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
-                child: Image.asset(
-                  ProductImageHelper.getAssetPath(product.name),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
+                child: product.image.startsWith('http')
+                    ? Image.network(
+                        product.image,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        loadingBuilder: (ctx, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2)),
+                          );
+                        },
+                        errorBuilder: (ctx, e, st) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                      )
+                    : Image.asset(
+                        ProductImageHelper.getAssetPath(product.name),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
               ),
             ),
             Padding(
@@ -334,71 +661,51 @@ class _HomePageState extends State<HomePage> {
                           fontSize: 18,
                         ),
                       ),
-                      Row(
-                        children: [
-                          BlocBuilder<AuthBloc, AuthState>(
-                            builder: (context, authState) {
-                              return BlocBuilder<FavoritesBloc, FavoritesState>(
-                                builder: (context, state) {
-                                  final isFavorite = state is FavoritesLoaded &&
-                                      state.favorites.any((p) => p.id == product.id);
-                                  final isGuest = authState is! AuthSuccess;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      if (isGuest) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: const Text('Sign in to save favorites'),
-                                            backgroundColor: Colors.orange[700],
-                                            action: SnackBarAction(
-                                              label: 'Sign In',
-                                              textColor: Colors.white,
-                                              onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
-                                            ),
-                                          ),
-                                        );
-                                      } else {
-                                        context
-                                            .read<FavoritesBloc>()
-                                            .add(ToggleFavoriteEvent(product.id));
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFE8F5E9),
-                                        shape: BoxShape.circle,
+                      BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, authState) {
+                          return BlocBuilder<FavoritesBloc, FavoritesState>(
+                            builder: (context, state) {
+                              final isFavorite = state is FavoritesLoaded &&
+                                  state.favorites.any((p) => p.id == product.id);
+                              final isGuest = authState is! AuthSuccess;
+                              return GestureDetector(
+                                onTap: () {
+                                  if (isGuest) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text('Sign in to save favorites'),
+                                        backgroundColor: Colors.orange[700],
+                                        action: SnackBarAction(
+                                          label: 'Sign In',
+                                          textColor: Colors.white,
+                                          onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                                        ),
                                       ),
-                                      child: Icon(
-                                        isFavorite
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: const Color(0xFF2E7D32),
-                                        size: 18,
-                                      ),
-                                    ),
-                                  );
+                                    );
+                                  } else {
+                                    context
+                                        .read<FavoritesBloc>()
+                                        .add(ToggleFavoriteEvent(product.id));
+                                  }
                                 },
+                                child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE8F5E9),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: const Color(0xFF2E7D32),
+                                    size: 18,
+                                  ),
+                                ),
                               );
                             },
-                          ),
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/product'),
-                            child: Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF2E7D32),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ],
                   ),

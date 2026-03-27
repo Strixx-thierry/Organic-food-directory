@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import '../models/product_model.dart';
 
@@ -132,5 +133,28 @@ class ProductRepository {
     // Return mock product if not found
     final all = _generateMockProducts();
     return all.firstWhere((p) => p.id == id, orElse: () => all.first);
+  }
+
+  /// Real-time stream of all products from Firestore.
+  Stream<List<ProductModel>> productsStream() {
+    return _firestore.collection('products').snapshots().map(
+          (snap) => snap.docs
+              .map((doc) => ProductModel.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
+  }
+
+  /// Upload image bytes to Firebase Storage and return the download URL.
+  Future<String> uploadProductImage(Uint8List bytes) async {
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('products/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await ref.putData(bytes);
+    return ref.getDownloadURL();
+  }
+
+  /// Write a new product document to Firestore.
+  Future<void> addProduct(Map<String, dynamic> data) async {
+    await _firestore.collection('products').add(data);
   }
 }

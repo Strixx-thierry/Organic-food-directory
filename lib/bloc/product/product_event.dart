@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 abstract class ProductEvent extends Equatable {
   const ProductEvent();
@@ -20,4 +21,32 @@ class LoadProductDetailEvent extends ProductEvent {
   const LoadProductDetailEvent(this.id);
   @override
   List<Object> get props => [id];
+}
+
+class AddProductEvent extends ProductEvent {
+  final String name;
+  final String sub;
+  final String price;
+  final String category;
+  final Uint8List imageBytes;
+  final String phone;
+  final String fresh;
+  final String organic;
+  final String farm;
+
+  const AddProductEvent({
+    required this.name,
+    required this.sub,
+    required this.price,
+    required this.category,
+    required this.imageBytes,
+    required this.phone,
+    required this.fresh,
+    required this.organic,
+    required this.farm,
+  });
+
+  @override
+  List<Object> get props =>
+      [name, sub, price, category, imageBytes, phone, fresh, organic, farm];
 }

@@ -8,6 +8,9 @@ class ProductModel extends Equatable {
   final String category;
   final String image;
   final String? phone;
+  final String? fresh;
+  final String? organic;
+  final String? farm;
 
   const ProductModel({
     required this.id,
@@ -17,6 +20,9 @@ class ProductModel extends Equatable {
     required this.category,
     required this.image,
     this.phone,
+    this.fresh,
+    this.organic,
+    this.farm,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map, String id) {
@@ -28,9 +34,12 @@ class ProductModel extends Equatable {
       category: map['category'] ?? '',
       image: map['image'] ?? 'assets/placeholder.png',
       phone: map['phone'],
+      fresh: map['fresh'],
+      organic: map['organic'],
+      farm: map['farm'],
     );
   }
 
   @override
-  List<Object?> get props => [id, name, sub, price, category, image, phone];
+  List<Object?> get props => [id, name, sub, price, category, image, phone, fresh, organic, farm];
 }
