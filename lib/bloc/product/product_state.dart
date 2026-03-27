@@ -42,3 +42,7 @@ class ProductAddError extends ProductState {
   @override
   List<Object> get props => [message];
 }
+
+class ProductEditSuccess extends ProductState {}
+
+class ProductDeleteSuccess extends ProductState {}

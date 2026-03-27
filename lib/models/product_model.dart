@@ -11,6 +11,7 @@ class ProductModel extends Equatable {
   final String? fresh;
   final String? organic;
   final String? farm;
+  final String? userId;
 
   const ProductModel({
     required this.id,
@@ -23,6 +24,7 @@ class ProductModel extends Equatable {
     this.fresh,
     this.organic,
     this.farm,
+    this.userId,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map, String id) {
@@ -37,9 +39,10 @@ class ProductModel extends Equatable {
       fresh: map['fresh'],
       organic: map['organic'],
       farm: map['farm'],
+      userId: map['userId'],
     );
   }
 
   @override
-  List<Object?> get props => [id, name, description, price, category, image, phone, fresh, organic, farm];
+  List<Object?> get props => [id, name, description, price, category, image, phone, fresh, organic, farm, userId];
 }

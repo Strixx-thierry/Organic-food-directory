@@ -113,6 +113,8 @@ class _CategoryPageState extends State<CategoryPage> {
       setSheet(() => _showImageError = true);
       return;
     }
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is AuthSuccess ? authState.user.uid : '';
     context.read<ProductBloc>().add(AddProductEvent(
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
@@ -123,6 +125,7 @@ class _CategoryPageState extends State<CategoryPage> {
       fresh: _formFresh,
       organic: _formOrganic,
       farm: _formFarm,
+      userId: userId,
     ));
   }
 

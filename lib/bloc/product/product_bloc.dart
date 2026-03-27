@@ -15,6 +15,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<SearchProductsEvent>(_onSearch);
     on<LoadProductDetailEvent>(_onLoadDetail);
     on<AddProductEvent>(_onAddProduct);
+    on<EditProductEvent>(_onEditProduct);
+    on<DeleteProductEvent>(_onDeleteProduct);
   }
 
   Future<void> _onLoadProducts(
@@ -82,15 +84,57 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         'fresh': event.fresh,
         'organic': event.organic,
         'farm': event.farm,
+        'userId': event.userId,
       });
       emit(ProductAddSuccess());
-      // Reload so the home page featured grid stays fresh.
       final products = await _repository.getAllProducts();
       _cachedProducts = products;
       emit(ProductLoaded(products));
     } catch (e) {
       emit(ProductAddError(e.toString()));
-      // Restore the last known list so the home page doesn't go blank.
+      emit(ProductLoaded(_cachedProducts));
+    }
+  }
+
+  Future<void> _onEditProduct(
+      EditProductEvent event, Emitter<ProductState> emit) async {
+    emit(ProductAdding());
+    try {
+      final imageUrl = event.newImageBytes != null
+          ? await _repository.uploadProductImage(event.newImageBytes!)
+          : event.currentImageUrl;
+      await _repository.updateProduct(event.productId, {
+        'name': event.name,
+        'sub': event.description,
+        'price': event.price,
+        'category': event.category,
+        'image': imageUrl,
+        'phone': event.phone,
+        'fresh': event.fresh,
+        'organic': event.organic,
+        'farm': event.farm,
+      });
+      emit(ProductEditSuccess());
+      final products = await _repository.getAllProducts();
+      _cachedProducts = products;
+      emit(ProductLoaded(products));
+    } catch (e) {
+      emit(ProductAddError(e.toString()));
+      emit(ProductLoaded(_cachedProducts));
+    }
+  }
+
+  Future<void> _onDeleteProduct(
+      DeleteProductEvent event, Emitter<ProductState> emit) async {
+    emit(ProductAdding());
+    try {
+      await _repository.deleteProduct(event.productId);
+      emit(ProductDeleteSuccess());
+      final products = await _repository.getAllProducts();
+      _cachedProducts = products;
+      emit(ProductLoaded(products));
+    } catch (e) {
+      emit(ProductAddError(e.toString()));
       emit(ProductLoaded(_cachedProducts));
     }
   }
