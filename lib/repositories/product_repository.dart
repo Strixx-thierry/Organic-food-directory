@@ -67,4 +67,14 @@ class ProductRepository {
   Future<void> addProduct(Map<String, dynamic> data) async {
     await _firestore.collection('products').add(data);
   }
+
+  /// Update an existing product document in Firestore.
+  Future<void> updateProduct(String id, Map<String, dynamic> data) async {
+    await _firestore.collection('products').doc(id).update(data);
+  }
+
+  /// Delete a product document from Firestore.
+  Future<void> deleteProduct(String id) async {
+    await _firestore.collection('products').doc(id).delete();
+  }
 }

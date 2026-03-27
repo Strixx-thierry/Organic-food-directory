@@ -75,6 +75,8 @@ class _HomePageState extends State<HomePage> {
       setSheet(() => _showImageError = true);
       return;
     }
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState is AuthSuccess ? authState.user.uid : '';
     context.read<ProductBloc>().add(AddProductEvent(
       name: _nameController.text.trim(),
       description: _descriptionController.text.trim(),
@@ -85,6 +87,7 @@ class _HomePageState extends State<HomePage> {
       fresh: _formFresh,
       organic: _formOrganic,
       farm: _formFarm,
+      userId: userId,
     ));
   }
 
