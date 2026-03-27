@@ -41,8 +41,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     super.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ProductBloc, ProductState>(
@@ -65,8 +63,10 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new,
-                  color: Color(0xFF1B5E20)),
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Color(0xFF1B5E20),
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Container(
@@ -83,8 +83,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 },
                 decoration: const InputDecoration(
                   hintText: 'Search products...',
-                  prefixIcon:
-                      Icon(Icons.search, color: Color(0xFF1B5E20)),
+                  prefixIcon: Icon(Icons.search, color: Color(0xFF1B5E20)),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 10),
                 ),
@@ -96,7 +95,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 child: NotificationIconButton(
                   showBackground: false,
                   color: const Color(0xFF1B5E20),
-                  onPressed: () => NotificationDialogHelper.showNotificationsDialog(context),
+                  onPressed: () =>
+                      NotificationDialogHelper.showNotificationsDialog(context),
                 ),
               ),
             ],
@@ -121,7 +121,11 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.search_off, size: 64, color: Color(0xFFBDBDBD)),
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Color(0xFFBDBDBD),
+                              ),
                               SizedBox(height: 16),
                               Text(
                                 'No products found',
@@ -147,10 +151,7 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
     );
   }
 
-  Widget _searchResultItem(
-    ProductModel product,
-    BuildContext context,
-  ) {
+  Widget _searchResultItem(ProductModel product, BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/product', arguments: product),
       child: Container(
@@ -171,12 +172,39 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
-              child: Image.asset(
-                ProductImageHelper.getAssetPath(product.name),
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-              ),
+              child: product.image.startsWith('http')
+                  ? Image.network(
+                      product.image,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (ctx, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                      errorBuilder: (ctx, e, st) => Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey[200],
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      ProductImageHelper.getAssetPath(product.name),
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -207,7 +235,8 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               builder: (context, authState) {
                 return BlocBuilder<FavoritesBloc, FavoritesState>(
                   builder: (context, state) {
-                    final isFavorite = state is FavoritesLoaded &&
+                    final isFavorite =
+                        state is FavoritesLoaded &&
                         state.favorites.any((p) => p.id == product.id);
                     final isGuest = authState is! AuthSuccess;
                     return GestureDetector(
@@ -220,12 +249,17 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                               action: SnackBarAction(
                                 label: 'Sign In',
                                 textColor: Colors.white,
-                                onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                                onPressed: () => Navigator.pushReplacementNamed(
+                                  context,
+                                  '/login',
+                                ),
                               ),
                             ),
                           );
                         } else {
-                          context.read<FavoritesBloc>().add(ToggleFavoriteEvent(product.id));
+                          context.read<FavoritesBloc>().add(
+                            ToggleFavoriteEvent(product.id),
+                          );
                         }
                       },
                       child: Container(
@@ -236,7 +270,9 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                         ),
                         child: Icon(
                           isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : const Color(0xFF2E7D32),
+                          color: isFavorite
+                              ? Colors.red
+                              : const Color(0xFF2E7D32),
                           size: 20,
                         ),
                       ),

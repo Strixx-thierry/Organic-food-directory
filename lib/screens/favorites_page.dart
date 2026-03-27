@@ -32,11 +32,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, authState) {
         final isGuest = authState is! AuthSuccess;
-        
+
         if (isGuest) {
           return _buildGuestView();
         }
-        
+
         return _buildLoggedInView();
       },
     );
@@ -82,7 +82,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green[50],
                             borderRadius: BorderRadius.circular(20),
@@ -141,16 +143,45 @@ class _FavoritesPageState extends State<FavoritesPage> {
         onTap: () => Navigator.pushNamed(context, '/product', arguments: item),
         child: Card(
           margin: const EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                ProductImageHelper.getAssetPath(item.name),
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              ),
+              child: item.image.startsWith('http')
+                  ? Image.network(
+                      item.image,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (ctx, child, progress) {
+                        if (progress == null) return child;
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                      errorBuilder: (ctx, e, st) => Container(
+                        width: 60,
+                        height: 60,
+                        color: Colors.grey[200],
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : Image.asset(
+                      ProductImageHelper.getAssetPath(item.name),
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
             ),
             title: Text(
               item.name,
@@ -172,11 +203,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.favorite_border,
-            size: 80,
-            color: Colors.grey[300],
-          ),
+          Icon(Icons.favorite_border, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
             'No favorites yet',
@@ -189,23 +216,20 @@ class _FavoritesPageState extends State<FavoritesPage> {
           const SizedBox(height: 8),
           Text(
             'Browse products and add your favorites',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => Navigator.pushNamed(context, '/home'),
             icon: const Icon(Icons.shopping_bag, color: Colors.white),
-            label: const Text('Browse Products', style: TextStyle(color: Colors.white)),
+            label: const Text(
+              'Browse Products',
+              style: TextStyle(color: Colors.white),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2E7D32),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
         ],
