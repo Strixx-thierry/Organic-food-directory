@@ -17,24 +17,25 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
         super(FavoritesInitial()) {
     on<LoadFavoritesEvent>(_onLoadFavorites);
     on<ToggleFavoriteEvent>(_onToggleFavorite);
-    // Load favorites on initialization
-    add(LoadFavoritesEvent());
+    // Don't auto-load here — FavoritesPage.initState() handles this
+    // so we don't hammer Firestore before the user is even logged in.
   }
 
   Future<void> _onLoadFavorites(LoadFavoritesEvent event, Emitter<FavoritesState> emit) async {
     emit(FavoritesLoading());
     try {
       final ids = await _favRepo.getFavorites();
-      List<ProductModel> favProducts = [];
-      for (String id in ids) {
-        try {
-          final product = await _productRepo.getProduct(id);
-          favProducts.add(product);
-        } catch (e) {
-          // Skip products that don't exist
-          continue;
-        }
-      }
+      // Fetch all products in parallel instead of one at a time
+      final results = await Future.wait(
+        ids.map((id) async {
+          try {
+            return await _productRepo.getProduct(id);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
+      final favProducts = results.whereType<ProductModel>().toList();
       emit(FavoritesLoaded(favProducts));
     } catch (e) {
       emit(FavoritesError(e.toString()));

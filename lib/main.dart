@@ -34,31 +34,41 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Sign out any cached session to ensure login page shows first
-  await FirebaseAuth.instance.signOut();
-  
-  // Initialize notification service
-  final notificationService = NotificationService();
-  await notificationService.initialize();
-  
+
+  // Clear any cached session so the login page always shows first.
+  // Timeout prevents this from blocking startup on slow emulators.
+  try {
+    await FirebaseAuth.instance.signOut().timeout(const Duration(seconds: 5));
+  } catch (_) {}
+
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+
+  // Init notifications in the background — no need to block runApp for this.
+  NotificationService().initialize();
+
+  runApp(MyApp(
+    userRepo: UserRepository(),
+    productRepo: ProductRepository(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UserRepository userRepo;
+  final ProductRepository productRepo;
+
+  const MyApp({super.key, required this.userRepo, required this.productRepo});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => AuthBloc(repository: UserRepository())),
-        BlocProvider(create: (_) => ProfileBloc(repository: UserRepository())),
-        BlocProvider(create: (_) => ProductBloc(repository: ProductRepository())),
+        BlocProvider(create: (_) => AuthBloc(repository: userRepo)),
+        BlocProvider(create: (_) => ProfileBloc(repository: userRepo)),
+        BlocProvider(create: (_) => ProductBloc(repository: productRepo)),
         BlocProvider(
           create: (_) => FavoritesBloc(
             favRepo: FavoritesRepository(),
-            productRepo: ProductRepository(),
+            productRepo: productRepo,
           ),
         ),
         BlocProvider(
