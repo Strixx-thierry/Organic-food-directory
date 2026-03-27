@@ -48,8 +48,9 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
   @override
   void initState() {
     super.initState();
-    // Check verification status every 2 seconds
-    _timer = Timer.periodic(const Duration(seconds: 2), (timer) {
+    // Check verification status every 4 seconds — frequent enough to feel
+    // responsive but doesn't hammer Firebase on slow emulators.
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       _checkVerification();
     });
     // Initial check right away

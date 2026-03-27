@@ -16,9 +16,9 @@ class UserRepository {
   /// Lazy initialization of GoogleSignIn - only when needed
   GoogleSignIn _getGoogleSignIn() {
     if (!_googleSignInInitialized) {
-      _googleSignIn = GoogleSignIn(
-        clientId: '885163617614-dlc8fqdenhnh7rq01ca9qqcc8pj1pmst.apps.googleusercontent.com',
-      );
+      // clientId is only for iOS/Web. Android reads credentials from
+      // google-services.json automatically — passing it here breaks sign-in.
+      _googleSignIn = GoogleSignIn();
       _googleSignInInitialized = true;
     }
     return _googleSignIn;

@@ -11,6 +11,73 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+// Pre-computed colors — avoids allocating new Color objects on every rebuild.
+// withOpacity() is also deprecated in newer Flutter, so use hex directly.
+const _shadowDark = Color(0x33000000);  // black @ 20%
+const _shadowMid  = Color(0x26000000);  // black @ 15%
+const _btnShadow  = Color(0x662E7D32);  // green @ 40%
+
+// Background widget is fully static — pulling it out means it never repaints
+// when the form state changes (loading spinner, checkbox, password toggle).
+class _LoginBackground extends StatelessWidget {
+  const _LoginBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF388E3C)],
+            ),
+          ),
+          child: SizedBox.expand(),
+        ),
+        const Positioned(
+          top: -60,
+          right: -60,
+          child: _DecorCircle(180, Color(0x0FFFFFFF)),
+        ),
+        const Positioned(
+          top: 80,
+          right: 30,
+          child: _DecorCircle(80, Color(0x14FFFFFF)),
+        ),
+        const Positioned(
+          bottom: -80,
+          left: -60,
+          child: _DecorCircle(200, Color(0x0DFFFFFF)),
+        ),
+        const Positioned(
+          bottom: 120,
+          right: -30,
+          child: _DecorCircle(100, Color(0x12FFFFFF)),
+        ),
+      ],
+    );
+  }
+}
+
+class _DecorCircle extends StatelessWidget {
+  final double size;
+  final Color color;
+  const _DecorCircle(this.size, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+    );
+  }
+}
+
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
@@ -80,35 +147,8 @@ class _LoginScreenState extends State<LoginScreen>
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF388E3C)],
-                ),
-              ),
-            ),
-            Positioned(
-              top: -60,
-              right: -60,
-              child: _decorCircle(180, Colors.white.withOpacity(0.06)),
-            ),
-            Positioned(
-              top: 80,
-              right: 30,
-              child: _decorCircle(80, Colors.white.withOpacity(0.08)),
-            ),
-            Positioned(
-              bottom: -80,
-              left: -60,
-              child: _decorCircle(200, Colors.white.withOpacity(0.05)),
-            ),
-            Positioned(
-              bottom: 120,
-              right: -30,
-              child: _decorCircle(100, Colors.white.withOpacity(0.07)),
-            ),
+            // Isolated in its own layer so form rebuilds don't repaint the bg
+            const RepaintBoundary(child: _LoginBackground()),
             SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -127,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: _shadowDark,
                                 blurRadius: 24,
                                 offset: const Offset(0, 10),
                               ),
@@ -174,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen>
                             borderRadius: BorderRadius.circular(28),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
+                                color: _shadowMid,
                                 blurRadius: 30,
                                 offset: const Offset(0, 12),
                               ),
@@ -307,8 +347,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           borderRadius:
                                               BorderRadius.circular(16)),
                                       elevation: 4,
-                                      shadowColor:
-                                          const Color(0xFF2E7D32).withOpacity(0.4),
+                                      shadowColor: _btnShadow,
                                     ),
                                     child: _isLoading
                                         ? const SizedBox(
@@ -449,14 +488,6 @@ class _LoginScreenState extends State<LoginScreen>
           ],
         ),
       ),
-    );
-  }
-
-  Widget _decorCircle(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 
