@@ -107,22 +107,7 @@ class _HomePageState extends State<HomePage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => BlocConsumer<ProductBloc, ProductState>(
-        listener: (bCtx, state) {
-          if (state is ProductAddSuccess) {
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(bCtx).showSnackBar(
-              const SnackBar(
-                content: Text('Product added successfully'),
-                backgroundColor: Color(0xFF2E7D32),
-              ),
-            );
-          } else if (state is ProductAddError) {
-            ScaffoldMessenger.of(bCtx).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
+      builder: (ctx) => BlocBuilder<ProductBloc, ProductState>(
         builder: (bCtx, productState) {
           final isUploading = productState is ProductAdding;
           return StatefulBuilder(
@@ -326,16 +311,32 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        // Get user name from AuthBloc
-        String userName = 'User';
-        if (authState is AuthSuccess) {
-          userName = authState.user.name;
+    return BlocListener<ProductBloc, ProductState>(
+      listener: (context, state) {
+        if (state is ProductAddSuccess) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product added successfully'),
+              backgroundColor: Color(0xFF2E7D32),
+            ),
+          );
+        } else if (state is ProductAddError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
         }
+      },
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+          // Get user name from AuthBloc
+          String userName = 'User';
+          if (authState is AuthSuccess) {
+            userName = authState.user.name;
+          }
 
-        return BlocBuilder<ProductBloc, ProductState>(
-          builder: (context, state) {
+          return BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, state) {
             if (state is ProductInitial) {
               context.read<ProductBloc>().add(LoadProductsEvent());
               return const Scaffold(
@@ -537,9 +538,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             );
-          },
-        );
-      },
+            },
+          );
+        },
+      ),
     );
   }
 
