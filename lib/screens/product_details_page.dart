@@ -497,11 +497,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      if (productDescription.isNotEmpty)
-                        Text(
-                          productDescription,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                        ),
+                      // if (productDescription.isNotEmpty)
+                      //   Text(
+                      //     productDescription,
+                      //     style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                      //   ),
                       const SizedBox(height: 24),
                       Row(
                         children: [
