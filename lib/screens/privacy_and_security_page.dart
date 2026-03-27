@@ -650,6 +650,9 @@ class _PrivacyAndSecurityPageState extends State<PrivacyAndSecurityPage> {
                                   return;
                                 }
 
+                                final navigator = Navigator.of(context);
+                                final messenger = ScaffoldMessenger.of(context);
+
                                 setState(() => isLoading = true);
 
                                 try {
@@ -658,18 +661,22 @@ class _PrivacyAndSecurityPageState extends State<PrivacyAndSecurityPage> {
                                   );
 
                                   if (mounted) {
-                                    Navigator.pop(context);
-                                    Navigator.pop(context); // Pop privacy page
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: const Text('Account deleted successfully'),
-                                        backgroundColor: Colors.red[600],
+                                    navigator.pop(); // close dialog
+                                    navigator.pushNamedAndRemoveUntil(
+                                      '/login',
+                                      (route) => false,
+                                    );
+                                    messenger.showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Your account has been deleted'),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
                                       ),
                                     );
                                   }
                                 } catch (e) {
                                   if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                    messenger.showSnackBar(
                                       SnackBar(
                                         content: Text('Error: ${e.toString()}'),
                                         backgroundColor: Colors.red,

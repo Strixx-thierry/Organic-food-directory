@@ -11,6 +11,7 @@ import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/widgets/notification_icon_button.dart';
 import 'package:organic_food_directory/utils/notification_dialog_helper.dart';
+import 'package:organic_food_directory/utils/product_image_helper.dart';
 
 class SearchResultsPage extends StatefulWidget {
   const SearchResultsPage({super.key});
@@ -167,17 +168,13 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
         ),
         child: Row(
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Icon(
-                Icons.eco_rounded,
-                color: Colors.green,
-                size: 40,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.asset(
+                ProductImageHelper.getAssetPath(product.name),
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 15),

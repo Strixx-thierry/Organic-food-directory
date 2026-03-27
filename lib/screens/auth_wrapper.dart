@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 import 'login_screen.dart';
@@ -73,7 +74,13 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
         
         if (updatedUser != null && updatedUser.emailVerified && !_verificationDetected && mounted) {
           _verificationDetected = true;
-          
+
+          // Sync verified status to Firestore
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(updatedUser.uid)
+              .update({'isEmailVerified': true});
+
           // Show success snackbar
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -168,6 +175,7 @@ class _EmailVerificationWaitingScreenState extends State<EmailVerificationWaitin
                 label: const Text('Resend Verification Email'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 14,

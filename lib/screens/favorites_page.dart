@@ -7,6 +7,7 @@ import 'package:organic_food_directory/bloc/auth/auth_bloc.dart';
 import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/models/product_model.dart';
 import 'package:organic_food_directory/widgets/guest_view_placeholder.dart';
+import 'package:organic_food_directory/utils/product_image_helper.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -142,15 +143,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
           margin: const EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
-            leading: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(item.image),
-                  fit: BoxFit.cover,
-                ),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                ProductImageHelper.getAssetPath(item.name),
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
               ),
             ),
             title: Text(

@@ -11,6 +11,7 @@ import 'package:organic_food_directory/bloc/auth/auth_state.dart';
 import 'package:organic_food_directory/widgets/notification_icon_button.dart';
 import 'package:organic_food_directory/utils/notification_dialog_helper.dart';
 import 'package:organic_food_directory/models/product_model.dart';
+import 'package:organic_food_directory/utils/product_image_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -212,10 +213,10 @@ class _HomePageState extends State<HomePage> {
                         childAspectRatio: 0.75,
                         children: products.isEmpty
                             ? [
-                                _productItem(const ProductModel(id: 'spinach-1', name: 'Organic Spinach', sub: 'Fresh greens', price: '\$4.50', category: '', image: ''), context),
-                                _productItem(const ProductModel(id: 'tomato-1', name: 'Red Tomatoes', sub: 'Organic farm', price: '\$3.20', category: '', image: ''), context),
-                                _productItem(const ProductModel(id: 'apple-1', name: 'Sweet Apples', sub: 'Fresh fruits', price: '\$5.10', category: '', image: ''), context),
-                                _productItem(const ProductModel(id: 'eggs-1', name: 'Brown Eggs', sub: 'Cage free', price: '\$6.50', category: '', image: ''), context),
+                                _productItem(const ProductModel(id: 'spinach-1', name: 'Organic Spinach', sub: 'Fresh greens', price: '\$4.50', category: '', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLuIic4tYcrZvlnqopdsZRyuciPM77rza6Qw&s'), context),
+                                _productItem(const ProductModel(id: 'tomato-1', name: 'Red Tomatoes', sub: 'Organic farm', price: '\$3.20', category: '', image: 'https://cdn.prod.website-files.com/5b0fe2f89e0734b12f0d7f7e/5ea325d360a1b6c56a0452b4_Brand%20ecomm%20images%20square.png'), context),
+                                _productItem(const ProductModel(id: 'apple-1', name: 'Sweet Apples', sub: 'Fresh fruits', price: '\$5.10', category: '', image: 'https://www.gurneys.com/cdn/shop/files/12984A.webp?v=1729090097'), context),
+                                _productItem(const ProductModel(id: 'eggs-1', name: 'Brown Eggs', sub: 'Cage free', price: '\$6.50', category: '', image: 'https://images.squarespace-cdn.com/content/v1/63def75d6c752e7159ee7dd3/1689095881545-GJZCBTOHB8MF8LUHTLP7/Hope+Hill+Family+Farms+Brown+Eggs.jpg'), context),
                               ]
                             : products
                                 .take(4)
@@ -291,16 +292,14 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.green[50],
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
                 ),
-                width: double.infinity,
-                child: const Center(
-                  child: Icon(Icons.image, size: 50, color: Colors.green),
+                child: Image.asset(
+                  ProductImageHelper.getAssetPath(product.name),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
               ),
             ),

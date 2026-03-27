@@ -235,7 +235,9 @@ class UserRepository {
   }
 
   Future<void> logout() async {
-    await _googleSignIn.signOut();
+    if (_googleSignInInitialized) {
+      await _googleSignIn.signOut();
+    }
     await _auth.signOut();
   }
   
@@ -283,9 +285,10 @@ class UserRepository {
       
       // Delete user profile picture from storage if exists
       try {
-        await _storage.ref().child('profile_pictures').child(user.uid).delete();
+        await _storage.ref().child('profile_pictures').child(user.uid).delete()
+            .timeout(const Duration(seconds: 5));
       } catch (e) {
-        // Ignore storage deletion errors (file might not exist)
+        // Ignore storage deletion errors (file might not exist or network issue)
       }
       
       // Delete user document from Firestore
