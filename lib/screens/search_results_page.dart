@@ -116,27 +116,28 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                 ),
                 const SizedBox(height: 15),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: results.isEmpty ? 5 : results.length,
-                    itemBuilder: (context, index) {
-                      final p = results.isEmpty
-                          ? ProductModel(
-                              id: '',
-                              name: index % 2 == 0
-                                  ? 'Organic Broccoli'
-                                  : 'Green Lettuce',
-                              sub: 'Fresh Vegetable',
-                              price: index % 2 == 0 ? '\$3.50' : '\$2.00',
-                              category: '',
-                              image: '',
-                            )
-                          : results[index];
-                      return _searchResultItem(
-                        p,
-                        context,
-                      );
-                    },
-                  ),
+                  child: results.isEmpty
+                      ? const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off, size: 64, color: Color(0xFFBDBDBD)),
+                              SizedBox(height: 16),
+                              Text(
+                                'No products found',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF757575),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: results.length,
+                          itemBuilder: (context, index) =>
+                              _searchResultItem(results[index], context),
+                        ),
                 ),
               ],
             ),
@@ -188,14 +189,6 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1B5E20),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.sub,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 8),

@@ -156,7 +156,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               item.name,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text('${item.sub} • ${item.price}'),
+            subtitle: Text(item.price),
             trailing: IconButton(
               icon: const Icon(Icons.close, color: Colors.red),
               onPressed: () => _removeFavorite(item.id),
